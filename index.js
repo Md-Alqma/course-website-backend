@@ -47,6 +47,16 @@ app.post("/admin/course", adminAuthentication, (req, res) => {
   res.status(200).json({ message: "Course created successfully" });
 });
 
+app.put("/admin/course/:courseId", adminAuthentication, (req, res) => {
+  const courseId = parseInt(req.params.courseId);
+  const course = COURSES.find((c) => c.id === courseId);
+  if (course) {
+    Object.assign(course, req.body);
+    res.status(200).json({ message: "Course updated successfully" });
+  }
+  res.status(404).json({ message: "Course not found" });
+});
+
 app.get("/admin/courses", adminAuthentication, (req, res) => {
   res.status(200).json({ courses: COURSES });
 });
