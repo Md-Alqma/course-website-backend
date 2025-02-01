@@ -6,6 +6,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 let ADMINS = [];
+let COURSES = [];
 
 const adminAuthentication = (req, res, next) => {
   const { username, password } = req.headers;
@@ -36,6 +37,13 @@ app.post("/admin/signup", (req, res) => {
 
 app.post("/admin/login", adminAuthentication, (req, res) => {
   res.status(200).json({ message: "Admin login successful" });
+});
+
+app.post("/admin/course", adminAuthentication, (req, res) => {
+  const course = req.body;
+  course.id = Date.now();
+  COURSES.push(course);
+  res.status(200).json({ message: "Course created successfully" });
 });
 
 app.listen(PORT, () => {
