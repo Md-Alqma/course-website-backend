@@ -57,6 +57,16 @@ app.put("/admin/course/:courseId", adminAuthentication, (req, res) => {
   res.status(404).json({ message: "Course not found" });
 });
 
+app.delete("/admin/course/:courseId", adminAuthentication, (req, res) => {
+  const courseId = parseInt(req.params.courseId);
+  const courseIndex = COURSES.findIndex((c) => c.id === courseId);
+  if (courseIndex === -1) {
+    res.status(404).json({ message: "Course not found" });
+  }
+  COURSES.splice(courseIndex, 1);
+  res.status(200).json({ message: "Course deleted successfully" });
+});
+
 app.get("/admin/courses", adminAuthentication, (req, res) => {
   res.status(200).json({ courses: COURSES });
 });
