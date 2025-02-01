@@ -10,7 +10,8 @@ let COURSES = [];
 
 const adminAuthentication = (req, res, next) => {
   const { username, password } = req.headers;
-  console.log("inside authenticatoin");
+  console.log(username, password);
+
   const admin = ADMINS.find(
     (a) => a.username === username && a.password === password
   );
@@ -44,6 +45,10 @@ app.post("/admin/course", adminAuthentication, (req, res) => {
   course.id = Date.now();
   COURSES.push(course);
   res.status(200).json({ message: "Course created successfully" });
+});
+
+app.get("/admin/courses", adminAuthentication, (req, res) => {
+  res.status(200).json({ courses: COURSES });
 });
 
 app.listen(PORT, () => {
