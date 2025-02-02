@@ -84,7 +84,7 @@ app.get("/admin/courses", adminAuthentication, (req, res) => {
 });
 
 app.post("/user/signup", (req, res) => {
-  const user = req.body;
+  const user = { ...req.body, purchasedCourses: [] };
   const userExists = USERS.find((u) => u.username === user.username);
   if (userExists) {
     res.status(403).json({ message: "User already exists" });
@@ -96,6 +96,12 @@ app.post("/user/signup", (req, res) => {
 app.post("/user/login", userAuthentication, (req, res) => {
   res.status(200).json({ message: "User logged in successfully" });
 });
+
+app.get("/user/courses", userAuthentication, (req, res) => {
+  const publishedCourses = COURSES.filter((c) => c.published === true);
+  res.status(200).json({ courses: publishedCourses });
+});
+
 
 app.listen(PORT, () => {
   console.log("Server is listening on port 3000");
