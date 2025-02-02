@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 let ADMINS = [];
 let COURSES = [];
+let USERS = [];
 
 const adminAuthentication = (req, res, next) => {
   const { username, password } = req.headers;
@@ -69,6 +70,16 @@ app.delete("/admin/course/:courseId", adminAuthentication, (req, res) => {
 
 app.get("/admin/courses", adminAuthentication, (req, res) => {
   res.status(200).json({ courses: COURSES });
+});
+
+app.post("/user/signup", (req, res) => {
+  const user = req.body;
+  const userExists = USERS.find((u) => u.username === user.username);
+  if (userExists) {
+    res.status(403).json({ message: "User already exists" });
+  }
+  USERS.push(user);
+  res.status(200).json({ message: "User created successfully" });
 });
 
 app.listen(PORT, () => {
