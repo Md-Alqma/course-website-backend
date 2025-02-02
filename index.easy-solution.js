@@ -113,6 +113,24 @@ app.post("/user/courses/:courseId", userAuthentication, (req, res) => {
   }
   res.status(404).json({ message: "Course not found or not available" });
 });
+
+app.get("/user/purchasedCourses", userAuthentication, (req, res) => {
+  const purchasedCourses = COURSES.filter((course) =>
+    req.user.purchasedCourses.includes(course.id)
+  );
+
+  // Alternate to the above 3 lines of code is below 8 lines of code
+
+  // const purchasedCoursesId = req.user.purchasedCourses;
+  // const purchasedCourses = [];
+  // for(let i=0; i<COURSES.length; i++) {
+  //   if(purchasedCoursesId.indexOf(COURSES[i]) !== -1) {
+  //     purchasedCourses.push(COURSES[i]);
+  //   }
+  // }
+  
+  res.status(200).json({ purchasedCourses });
+});
 app.listen(PORT, () => {
   console.log("Server is listening on port 3000");
 });
