@@ -11,15 +11,26 @@ let USERS = [];
 
 const adminAuthentication = (req, res, next) => {
   const { username, password } = req.headers;
-  console.log(username, password);
 
   const admin = ADMINS.find(
     (a) => a.username === username && a.password === password
   );
   if (admin) {
-    next();
+    return next();
   }
   res.status(403).json({ message: "Admin authentication failed" });
+};
+
+const userAuthentication = (req, res, next) => {
+  const { username, password } = req.headers;
+  const user = USERS.find(
+    (u) => u.username === username && u.password === password
+  );
+  if (user) {
+    req.user = user;
+    return next();
+  }
+  res.status(403).json({ message: "User authentication failed" });
 };
 
 app.get("/", (req, res) => {
@@ -80,6 +91,10 @@ app.post("/user/signup", (req, res) => {
   }
   USERS.push(user);
   res.status(200).json({ message: "User created successfully" });
+});
+
+app.post("/user/login", userAuthentication, (req, res) => {
+  res.status(200).json({ message: "User logged in successfully" });
 });
 
 app.listen(PORT, () => {
