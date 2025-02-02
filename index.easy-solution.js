@@ -98,11 +98,21 @@ app.post("/user/login", userAuthentication, (req, res) => {
 });
 
 app.get("/user/courses", userAuthentication, (req, res) => {
-  const publishedCourses = COURSES.filter((c) => c.published === true);
+  const publishedCourses = COURSES.filter((c) => c.published);
   res.status(200).json({ courses: publishedCourses });
 });
 
-
+app.post("/user/courses/:courseId", userAuthentication, (req, res) => {
+  const courseId = parseInt(req.params.courseId);
+  const course = COURSES.find((c) => c.id === courseId && c.published);
+  if (course) {
+    req.user.purchasedCourses.push(courseId);
+    return res.status(200).json({
+      message: "Course purchased successfully",
+    });
+  }
+  res.status(404).json({ message: "Course not found or not available" });
+});
 app.listen(PORT, () => {
   console.log("Server is listening on port 3000");
 });
