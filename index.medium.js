@@ -97,6 +97,10 @@ app.delete("/admin/course/:courseId", adminAuthentication, (req, res) => {
   res.status(404).json({ message: "Course not found" });
 });
 
+app.get("/admin/courses", adminAuthentication, (req, res) => {
+  res.status(200).json({ courses: COURSES });
+});
+
 app.listen(PORT, () => {
   console.log("server is listening on port " + PORT);
 });
