@@ -21,6 +21,18 @@ const saveAdmins = (admin) => {
 
 let ADMINS = getAdmins();
 
+const adminAuthentication = (req, res, next) => {
+  const admin = req.body;
+  if (
+    ADMINS.find(
+      (a) => a.username === admin.username && a.password === admin.password
+    )
+  ) {
+    return next();
+  }
+  return res.status(401).json({ message: "Admin authentication failed" });
+};
+
 app.get("/", (req, res) => {
   res.send("Welcome to Course Website!");
 });
@@ -36,6 +48,10 @@ app.post("/admin/signup", (req, res) => {
   ADMINS.push(admin);
   saveAdmins(ADMINS);
   res.status(200).json({ message: "Admin Created Successfully" });
+});
+
+app.post("/admin/login", adminAuthentication, (req, res) => {
+  res.status(200).json({ message: "Admin Login Successfully" });
 });
 
 app.listen(PORT, () => {
