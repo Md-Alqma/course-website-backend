@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 let ADMINS_FILE = "admins.json";
 let COURSE_FILE = "courses.json";
+let USERS_FILE = "users.json";
 
 const getAdmins = () => {
   if (fs.existsSync(ADMINS_FILE)) {
@@ -31,8 +32,20 @@ const saveCourses = (courses) => {
   fs.writeFileSync(COURSE_FILE, JSON.stringify(courses, null, 2));
 };
 
+const getUsers = () => {
+  if (fs.existsSync(USERS_FILE)) {
+    return JSON.parse(fs.readFileSync(USERS_FILE, "utf8"));
+  }
+  return [];
+};
+
+const saveUsers = (users) => {
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+};
+
 let ADMINS = getAdmins();
 let COURSES = getCourses();
+let USERS = getUsers();
 
 const adminAuthentication = (req, res, next) => {
   const { username, password } = req.headers;
@@ -80,7 +93,7 @@ app.put("/admin/course/:courseId", adminAuthentication, (req, res) => {
   if (course) {
     Object.assign(course, req.body);
     saveCourses(COURSES);
-    res.status(200).json({ message: "Course updated successfully" });
+    return res.status(200).json({ message: "Course updated successfully" });
   }
   res.status(404).json({ message: "Course not found" });
 });
@@ -92,13 +105,26 @@ app.delete("/admin/course/:courseId", adminAuthentication, (req, res) => {
   if (courseIndex !== -1) {
     COURSES.splice(courseIndex, 1);
     saveCourses(COURSES);
-    res.status(200).json({ message: "Course deleted successfully" });
+    return res.status(200).json({ message: "Course deleted successfully" });
   }
   res.status(404).json({ message: "Course not found" });
 });
 
 app.get("/admin/courses", adminAuthentication, (req, res) => {
   res.status(200).json({ courses: COURSES });
+});
+
+// USER Endpoints
+
+app.post("/user/signup", (req, res) => {
+  const user = req.body;
+  const userExists = USERS.find((u) => u.username === user.username);
+  if (userExists) {
+    return res.status(409).json({ message: "User already exists" });
+  }
+  USERS.push(user);
+  saveUsers(USERS);
+  res.status(200).json({ message: "User registration successful" });
 });
 
 app.listen(PORT, () => {
