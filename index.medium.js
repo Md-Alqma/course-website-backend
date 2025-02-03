@@ -74,6 +74,29 @@ app.post("/admin/course", adminAuthentication, (req, res) => {
     .json({ message: " Course created successfully", courseId: courseId });
 });
 
+app.put("/admin/course/:courseId", adminAuthentication, (req, res) => {
+  const courseId = parseInt(req.params.courseId);
+  const course = COURSES.find((c) => c.id === courseId);
+  if (course) {
+    Object.assign(course, req.body);
+    saveCourses(COURSES);
+    res.status(200).json({ message: "Course updated successfully" });
+  }
+  res.status(404).json({ message: "Course not found" });
+});
+
+app.delete("/admin/course/:courseId", adminAuthentication, (req, res) => {
+  const courseId = parseInt(req.params.courseId);
+  const courseIndex = COURSES.findIndex((course) => course.id === courseId);
+
+  if (courseIndex !== -1) {
+    COURSES.splice(courseIndex, 1);
+    saveCourses(COURSES);
+    res.status(200).json({ message: "Course deleted successfully" });
+  }
+  res.status(404).json({ message: "Course not found" });
+});
+
 app.listen(PORT, () => {
   console.log("server is listening on port " + PORT);
 });
