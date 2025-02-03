@@ -7,6 +7,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 let ADMINS_FILE = "admins.json";
+let COURSE_FILE = "courses.json";
 
 const getAdmins = () => {
   if (fs.existsSync(ADMINS_FILE)) {
@@ -19,15 +20,23 @@ const saveAdmins = (admin) => {
   fs.writeFileSync(ADMINS_FILE, JSON.stringify(admin, null, 2));
 };
 
+const getCourses = () => {
+  if (fs.existsSync(COURSE_FILE)) {
+    return JSON.parse(fs.readFileSync(COURSE_FILE, "utf8"));
+  }
+  return [];
+};
+
+const saveCourses = (courses) => {
+  fs.writeFileSync(COURSE_FILE, JSON.stringify(courses, null, 2));
+};
+
 let ADMINS = getAdmins();
+let COURSES = getCourses();
 
 const adminAuthentication = (req, res, next) => {
-  const admin = req.body;
-  if (
-    ADMINS.find(
-      (a) => a.username === admin.username && a.password === admin.password
-    )
-  ) {
+  const { username, password } = req.headers;
+  if (ADMINS.find((a) => a.username === username && a.password === password)) {
     return next();
   }
   return res.status(401).json({ message: "Admin authentication failed" });
@@ -52,6 +61,17 @@ app.post("/admin/signup", (req, res) => {
 
 app.post("/admin/login", adminAuthentication, (req, res) => {
   res.status(200).json({ message: "Admin Login Successfully" });
+});
+
+app.post("/admin/course", adminAuthentication, (req, res) => {
+  const course = req.body;
+  const courseId = COURSES.length + 1;
+  course.id = courseId;
+  COURSES.push(course);
+  saveCourses(COURSES);
+  res
+    .status(200)
+    .json({ message: " Course created successfully", courseId: courseId });
 });
 
 app.listen(PORT, () => {
