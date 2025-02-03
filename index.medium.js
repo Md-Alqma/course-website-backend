@@ -55,6 +55,18 @@ const adminAuthentication = (req, res, next) => {
   return res.status(401).json({ message: "Admin authentication failed" });
 };
 
+const userAuthentication = (req, res, next) => {
+  const { username, password } = req.headers;
+  const user = USERS.find(
+    (u) => u.username === username && u.password === password
+  );
+  if (user) {
+    req.user = user;
+    return next();
+  }
+  res.status(401).json({ message: "User authentication failed" });
+};
+
 app.get("/", (req, res) => {
   res.send("Welcome to Course Website!");
 });
@@ -117,7 +129,7 @@ app.get("/admin/courses", adminAuthentication, (req, res) => {
 // USER Endpoints
 
 app.post("/user/signup", (req, res) => {
-  const user = req.body;
+  const user = { ...req.body, purchasedCourses: [] };
   const userExists = USERS.find((u) => u.username === user.username);
   if (userExists) {
     return res.status(409).json({ message: "User already exists" });
@@ -126,6 +138,12 @@ app.post("/user/signup", (req, res) => {
   saveUsers(USERS);
   res.status(200).json({ message: "User registration successful" });
 });
+
+app.post("/user/login", userAuthentication, (req, res) => {
+  res.status(200).json({ message: "User login successful" });
+});
+
+
 
 app.listen(PORT, () => {
   console.log("server is listening on port " + PORT);
