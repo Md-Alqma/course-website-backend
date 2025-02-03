@@ -87,7 +87,7 @@ app.post("/user/signup", (req, res) => {
   const user = { ...req.body, purchasedCourses: [] };
   const userExists = USERS.find((u) => u.username === user.username);
   if (userExists) {
-    res.status(403).json({ message: "User already exists" });
+    res.status(401).json({ message: "User already exists" });
   }
   USERS.push(user);
   res.status(200).json({ message: "User created successfully" });
@@ -128,7 +128,7 @@ app.get("/user/purchasedCourses", userAuthentication, (req, res) => {
   //     purchasedCourses.push(COURSES[i]);
   //   }
   // }
-  
+
   res.status(200).json({ purchasedCourses });
 });
 app.listen(PORT, () => {
