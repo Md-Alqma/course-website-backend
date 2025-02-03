@@ -165,19 +165,22 @@ app.post("/user/course/:courseId", userAuthentication, (req, res) => {
   const course = COURSES.find((c) => c.id === courseId);
 
   if (course) {
-    req.user.purchasedCourses.push(courseId);
-    saveUsers(USERS);
-    return res.status(200).json({ message: "Course purchased successfully" });
+    if (req.user.purchasedCourses.some((c) => c.id === courseId)) {
+      return res.status(400).json({ message: "Course already purchased" });
+    } else {
+      req.user.purchasedCourses.push(course);
+      saveUsers(USERS);
+      return res.status(200).json({ message: "Course purchased successfully" });
+    }
   }
   res.status(404).json({ message: "Course not found" });
 });
 
 app.get("/user/purchasedCourses", userAuthentication, (req, res) => {
-  const purchasedCourses = COURSES.filter((c) =>
-    req.user.purchasedCourses.includes(c.id)
-  );
-  if (purchasedCourses) {
-    return res.status(200).json({ purchasedCourses: purchasedCourses });
+  if (req.user.purchasedCourses) {
+    return res
+      .status(200)
+      .json({ purchasedCourses: req.user.purchasedCourses });
   }
   res.status(404).json({ message: "No course purchased" });
 });
