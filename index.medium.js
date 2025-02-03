@@ -143,7 +143,44 @@ app.post("/user/login", userAuthentication, (req, res) => {
   res.status(200).json({ message: "User login successful" });
 });
 
+app.get("/user/courses", userAuthentication, (req, res) => {
+  const publishedCourses = COURSES.filter((course) => course.published);
+  if (publishedCourses) {
+    return res.status(200).json({ courses: publishedCourses });
+  }
+  res.status(404).json({ message: "No courses found" });
+});
 
+app.get("/user/course/:courseId", userAuthentication, (req, res) => {
+  const courseId = parseInt(req.params.courseId);
+  const course = COURSES.find((c) => c.id === courseId);
+  if (course) {
+    return res.status(200).json({ course: course });
+  }
+  res.status(404).json({ message: "Course not found" });
+});
+
+app.post("/user/course/:courseId", userAuthentication, (req, res) => {
+  const courseId = parseInt(req.params.courseId);
+  const course = COURSES.find((c) => c.id === courseId);
+
+  if (course) {
+    req.user.purchasedCourses.push(courseId);
+    saveUsers(USERS);
+    return res.status(200).json({ message: "Course purchased successfully" });
+  }
+  res.status(404).json({ message: "Course not found" });
+});
+
+app.get("/user/purchasedCourses", userAuthentication, (req, res) => {
+  const purchasedCourses = COURSES.filter((c) =>
+    req.user.purchasedCourses.includes(c.id)
+  );
+  if (purchasedCourses) {
+    return res.status(200).json({ purchasedCourses: purchasedCourses });
+  }
+  res.status(404).json({ message: "No course purchased" });
+});
 
 app.listen(PORT, () => {
   console.log("server is listening on port " + PORT);

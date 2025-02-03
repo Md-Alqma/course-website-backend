@@ -2,6 +2,9 @@
   {
     "username": "a@a.com",
     "password": "123456",
-    "purchasedCourses": []
+    "purchasedCourses": [
+      1,
+      2
+    ]
   }
 ]

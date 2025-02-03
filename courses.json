@@ -7,5 +7,14 @@
     "instructor": "Alqma",
     "published": true,
     "id": 1
+  },
+  {
+    "title": "Java",
+    "description": "A Java Course",
+    "price": 2999,
+    "imageURL": "src",
+    "instructor": "Abdulla",
+    "published": true,
+    "id": 2
   }
 ]
