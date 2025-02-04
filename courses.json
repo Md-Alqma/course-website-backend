@@ -16,14 +16,5 @@
     "instructor": "Abdulla",
     "published": true,
     "id": 2
-  },
-  {
-    "title": "Course-3",
-    "description": "A course for Course-2",
-    "price": 1599,
-    "instructor": "Alqma",
-    "imageURL": "src",
-    "published": true,
-    "id": 3
   }
 ]

@@ -25,7 +25,7 @@ const authenticateAdminToken = (req, res, next) => {
       else return next();
     });
   }
-  res.status(403).json({ message: "Token not found" });
+  return res.status(403).json({ message: "Token not found" });
 };
 
 let ADMIN_FILE = "admins.json";
@@ -70,7 +70,7 @@ let courses = getCourses();
 let users = getUsers();
 
 app.get("/", (req, res) => {
-  res.send("Welcom to Course Website");
+  return res.send("Welcom to Course Website");
 });
 
 app.post("/admin/signup", (req, res) => {
@@ -83,7 +83,7 @@ app.post("/admin/signup", (req, res) => {
   admins.push(admin);
   const token = generateAdminToken(admin);
   saveAdmins(admins);
-  res
+  return res
     .status(200)
     .json({ message: "Admin registered successfully", token: token });
 });
@@ -101,7 +101,7 @@ app.post("/admin/login", (req, res) => {
       .status(200)
       .json({ message: "Admin login successful", token: token });
   } else {
-    res.status(401).json({ message: "Admin authentication failed" });
+    return res.status(401).json({ message: "Admin authentication failed" });
   }
 });
 
@@ -110,7 +110,7 @@ app.post("/admin/course", authenticateAdminToken, (req, res) => {
   course.id = courses.length + 1;
   courses.push(course);
   saveCourses(courses);
-  res
+  return res
     .status(200)
     .json({ message: "Course created successfully", id: course.id });
 });
@@ -123,8 +123,24 @@ app.put("/admin/course/:courseId", authenticateAdminToken, (req, res) => {
     saveCourses(courses);
     return res.status(200).json({ message: "Course edited successfully" });
   }
-  res.status(404).json({ message: "Course not found" });
+  return res.status(404).json({ message: "Course not found" });
 });
+
+app.delete("/admin/course/:courseId", authenticateAdminToken, (req, res) => {
+  const courseId = parseInt(req.params.courseId);
+  const courseIndex = courses.findIndex((c) => c.id === courseId);
+  if (courseIndex !== -1) {
+    courses.splice(courseIndex, 1);
+    saveCourses(courses);
+    return res.status(200).json({ message: "Course deleted successfully" });
+  }
+  return res.status(404).json({ message: "Course not found" });
+});
+
+app.get("/admin/courses", authenticateAdminToken, (req, res) => {
+  return res.status(200).json({ courses: courses });
+});
+
 
 app.listen(PORT, () => {
   console.log("Server listening on port " + PORT);
