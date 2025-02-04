@@ -114,6 +114,18 @@ app.post("/admin/course", authenticateAdminToken, (req, res) => {
     .status(200)
     .json({ message: "Course created successfully", id: course.id });
 });
+
+app.put("/admin/course/:courseId", authenticateAdminToken, (req, res) => {
+  const courseId = parseInt(req.params.courseId);
+  const course = courses.find((c) => c.id === courseId);
+  if (course) {
+    Object.assign(course, req.body);
+    saveCourses(courses);
+    return res.status(200).json({ message: "Course edited successfully" });
+  }
+  res.status(404).json({ message: "Course not found" });
+});
+
 app.listen(PORT, () => {
   console.log("Server listening on port " + PORT);
 });
