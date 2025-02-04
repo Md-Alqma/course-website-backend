@@ -16,5 +16,14 @@
     "instructor": "Abdulla",
     "published": true,
     "id": 2
+  },
+  {
+    "title": "Course-2",
+    "description": "A course for Course-2",
+    "price": 3999,
+    "instructor": "aa",
+    "imageURL": "src",
+    "published": true,
+    "id": 3
   }
 ]

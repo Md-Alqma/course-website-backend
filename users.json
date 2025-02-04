@@ -11,6 +11,15 @@
         "instructor": "Abdulla",
         "published": true,
         "id": 2
+      },
+      {
+        "title": "FS",
+        "description": "A Full Stack Course",
+        "price": 4999,
+        "imageURL": "src",
+        "instructor": "Alqma",
+        "published": true,
+        "id": 1
       }
     ]
   }
