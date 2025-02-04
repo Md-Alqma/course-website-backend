@@ -173,7 +173,7 @@ app.post("/user/course/:courseId", userAuthentication, (req, res) => {
       return res.status(200).json({ message: "Course purchased successfully" });
     }
   }
-  res.status(404).json({ message: "Course not found" });
+  return res.status(404).json({ message: "Course not found" });
 });
 
 app.get("/user/purchasedCourses", userAuthentication, (req, res) => {
@@ -182,7 +182,7 @@ app.get("/user/purchasedCourses", userAuthentication, (req, res) => {
       .status(200)
       .json({ purchasedCourses: req.user.purchasedCourses });
   }
-  res.status(404).json({ message: "No course purchased" });
+  return res.status(404).json({ message: "No course purchased" });
 });
 
 app.listen(PORT, () => {

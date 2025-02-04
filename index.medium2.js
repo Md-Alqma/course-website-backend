@@ -163,7 +163,7 @@ app.get("/admin/courses", authenticateAdminToken, (req, res) => {
 });
 
 app.post("/user/signup", (req, res) => {
-  const user = { ...req.body, purchasedCourse: [] };
+  const user = req.body;
   const userExists = users.find((u) => u.username === user.username);
   if (userExists) {
     return res.status(409).json({ message: "User already exists" });
@@ -210,27 +210,39 @@ app.get("/user/course/:courseId", authenticateUserToken, (req, res) => {
 app.post("/user/course/:courseId", authenticateUserToken, (req, res) => {
   const courseId = parseInt(req.params.courseId);
   const course = courses.find((c) => c.id === courseId);
-
   if (course) {
     const user = users.find((u) => u.username === req.user.username);
-    if (user.purchasedCourse.some((c) => c.id === courseId)) {
-      return res.status(400).json({ message: "Course already purchased" });
-    } else {
-      user.purchasedCourse.push(course);
-      saveUsers(users);
-      return res.status(200).json({ message: "Course purchased successfully" });
+    console.log(user);
+
+    if (user) {
+      if (!user.purchasedCourse) {
+        user.purchasedCourse = [];
+      }
+      const courseAlreadyPurchased = user.purchasedCourse.find(
+        (c) => c.id === courseId
+      );
+      if (courseAlreadyPurchased) {
+        return res.status(400).json({ message: "Course already purchased" });
+      } else {
+        user.purchasedCourse.push(course);
+        saveUsers(users);
+        return res
+          .status(200)
+          .json({ message: "Course purchased successfully" });
+      }
     }
+    return res.status(404).json({ message: "User not found" });
   }
-  res.status(404).json({ message: "Course not found" });
+  return res.status(404).json({ message: "Course not found" });
 });
 
 app.get("/user/purchasedCourse", authenticateUserToken, (req, res) => {
   const user = users.find((u) => u.username === req.user.username);
-    if (user.purchasedCourse) {
-      return res.status(200).json({ courses: user.purchasedCourse });
-    } else {
-      return res.status(404).json({ courses: "No course purchased yet." });
-    }
+  if (user.purchasedCourse) {
+    return res.status(200).json({ courses: user.purchasedCourse });
+  } else {
+    return res.status(404).json({ courses: "No course purchased yet." });
+  }
 });
 app.listen(PORT, () => {
   console.log("Server listening on port " + PORT);
