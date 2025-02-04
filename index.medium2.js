@@ -28,6 +28,27 @@ const authenticateAdminToken = (req, res, next) => {
   return res.status(403).json({ message: "Token not found" });
 };
 
+const generateUserToken = (user) => {
+  const payload = { username: user.username };
+  return jwt.sign(payload, secret_key, { expiresIn: "1h" });
+};
+
+const authenticateUserToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+    jwt.verify(token, secret_key, (err, user) => {
+      if (err)
+        return res.status(401).json({ message: "User authentication failed" });
+      else {
+        req.user = user;
+        return next();
+      }
+    });
+  }
+  return res.status(403).json({ message: "Authentication failed" });
+};
+
 let ADMIN_FILE = "admins.json";
 let COURSE_FILE = "courses.json";
 let USER_FILE = "users.json";
@@ -141,7 +162,76 @@ app.get("/admin/courses", authenticateAdminToken, (req, res) => {
   return res.status(200).json({ courses: courses });
 });
 
+app.post("/user/signup", (req, res) => {
+  const user = { ...req.body, purchasedCourse: [] };
+  const userExists = users.find((u) => u.username === user.username);
+  if (userExists) {
+    return res.status(409).json({ message: "User already exists" });
+  }
+  users.push(user);
+  saveUsers(users);
+  const token = generateUserToken(user);
+  res
+    .status(200)
+    .json({ message: "User registered successfully", token: token });
+});
 
+app.post("/user/login", (req, res) => {
+  const { username, password } = req.headers;
+  const user = users.find(
+    (u) => u.username === username && u.password === password
+  );
+  if (user) {
+    const token = generateUserToken(user);
+    return res
+      .status(200)
+      .json({ message: "User logged in successfully", token: token });
+  }
+  res.status(401).json({ message: "User authentication failed" });
+});
+
+app.get("/user/course", authenticateUserToken, (req, res) => {
+  const publishedCourses = courses.filter((c) => c.published);
+  if (publishedCourses) {
+    return res.status(200).json({ courses: publishedCourses });
+  }
+  return res.status(404).json({ message: "No courses found" });
+});
+
+app.get("/user/course/:courseId", authenticateUserToken, (req, res) => {
+  const courseId = parseInt(req.params.courseId);
+  const course = courses.find((c) => c.id === courseId);
+  if (course) {
+    return res.status(200).json({ course: course });
+  }
+  return res.status(404).json({ message: "Course not found" });
+});
+
+app.post("/user/course/:courseId", authenticateUserToken, (req, res) => {
+  const courseId = parseInt(req.params.courseId);
+  const course = courses.find((c) => c.id === courseId);
+
+  if (course) {
+    const user = users.find((u) => u.username === req.user.username);
+    if (user.purchasedCourse.some((c) => c.id === courseId)) {
+      return res.status(400).json({ message: "Course already purchased" });
+    } else {
+      user.purchasedCourse.push(course);
+      saveUsers(users);
+      return res.status(200).json({ message: "Course purchased successfully" });
+    }
+  }
+  res.status(404).json({ message: "Course not found" });
+});
+
+app.get("/user/purchasedCourse", authenticateUserToken, (req, res) => {
+  const user = users.find((u) => u.username === req.user.username);
+    if (user.purchasedCourse) {
+      return res.status(200).json({ courses: user.purchasedCourse });
+    } else {
+      return res.status(404).json({ courses: "No course purchased yet." });
+    }
+});
 app.listen(PORT, () => {
   console.log("Server listening on port " + PORT);
 });

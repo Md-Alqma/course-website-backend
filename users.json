@@ -1,8 +1,17 @@
 [
   {
-    "username": "a@a.com",
-    "password": "123456",
-    "purchasedCourses": [
+    "username": "user1@gmail.com",
+    "password": "123123",
+    "purchasedCourse": [
+      {
+        "title": "Course-3",
+        "description": "A course for Course-3",
+        "price": 1599,
+        "imageURL": "src",
+        "instructor": "Abdullah",
+        "published": true,
+        "id": 1
+      },
       {
         "title": "Java",
         "description": "A Java Course",
@@ -11,15 +20,6 @@
         "instructor": "Abdulla",
         "published": true,
         "id": 2
-      },
-      {
-        "title": "FS",
-        "description": "A Full Stack Course",
-        "price": 4999,
-        "imageURL": "src",
-        "instructor": "Alqma",
-        "published": true,
-        "id": 1
       }
     ]
   }

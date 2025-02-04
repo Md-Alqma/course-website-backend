@@ -1,10 +1,10 @@
 [
   {
-    "title": "FS",
-    "description": "A Full Stack Course",
-    "price": 4999,
+    "title": "Course-3",
+    "description": "A course for Course-3",
+    "price": 1599,
     "imageURL": "src",
-    "instructor": "Alqma",
+    "instructor": "Abdullah",
     "published": true,
     "id": 1
   },
