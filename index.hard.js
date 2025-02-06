@@ -60,6 +60,16 @@ const authenticateAdmin = (req, res, next) => {
   });
 };
 
+// Middleware to restrict access to only regular users
+const authenticateRegularUser = (req, res, next) => {
+  authenticateUser(req, res, () => {
+    if (req.user.role !== "user") {
+      return res.status(403).json({ message: "Access denied: Users only" });
+    }
+    next();
+  });
+};
+
 app.get("/", (req, res) => {
   res.send("Welcome to course website");
 });
@@ -160,7 +170,7 @@ app.post("/user/login", async (req, res) => {
   }
 });
 
-app.get("/user/courses", authenticateUser, async (req, res) => {
+app.get("/user/courses", authenticateRegularUser, async (req, res) => {
   const publishedCourses = await Course.find({ published: true });
   if (publishedCourses) {
     return res.status(200).json({ courses: publishedCourses });
@@ -169,7 +179,7 @@ app.get("/user/courses", authenticateUser, async (req, res) => {
   }
 });
 
-app.get("/user/course/:courseId", authenticateUser, async (req, res) => {
+app.get("/user/course/:courseId", authenticateRegularUser, async (req, res) => {
   const course = await Course.findById(req.params.courseId);
   if (course) {
     return res.status(200).json({ course: course });
@@ -178,23 +188,27 @@ app.get("/user/course/:courseId", authenticateUser, async (req, res) => {
   }
 });
 
-app.post("/user/courses/:courseId", authenticateUser, async (req, res) => {
-  const course = await Course.findById(req.params.courseId);
-  if (course) {
-    const user = await User.findOne({ username: req.user.username });
-    if (user) {
-      user.purchasedCourses.push(course);
-      await user.save();
-      res.json({ message: "Course purchased successfully" });
+app.post(
+  "/user/courses/:courseId",
+  authenticateRegularUser,
+  async (req, res) => {
+    const course = await Course.findById(req.params.courseId);
+    if (course) {
+      const user = await User.findOne({ username: req.user.username });
+      if (user) {
+        user.purchasedCourses.push(course);
+        await user.save();
+        res.json({ message: "Course purchased successfully" });
+      } else {
+        res.status(403).json({ message: "User not found" });
+      }
     } else {
-      res.status(403).json({ message: "User not found" });
+      res.status(404).json({ message: "Course not found" });
     }
-  } else {
-    res.status(404).json({ message: "Course not found" });
   }
-});
+);
 
-app.get("/user/purchasedCourses", authenticateUser, async (req, res) => {
+app.get("/user/purchasedCourses", authenticateRegularUser, async (req, res) => {
   const user = await User.findOne({ username: req.user.username }).populate(
     "purchasedCourses"
   );
