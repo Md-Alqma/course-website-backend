@@ -47,8 +47,9 @@ const authenticateUser = (req, res, next) => {
         return next();
       }
     });
+  } else {
+    return res.status(403).json({ message: "Authentication failed" });
   }
-  return res.status(403).json({ message: "Authentication failed" });
 };
 app.get("/", (req, res) => {
   res.send("Welcome to course website");
@@ -83,6 +84,14 @@ app.post("/admin/login", async (req, res) => {
       .json({ message: "Admin login successful", token: token });
   }
   return res.status(403).json({ message: "Authentication failed" });
+});
+
+app.post("/admin/course", authenticateUser, async (req, res) => {
+  const course = new Course(req.body);
+  await course.save();
+  return res
+    .status(200)
+    .json({ message: "Course created successfully", courseId: course.id });
 });
 
 app.listen(PORT, () => {
