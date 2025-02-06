@@ -106,6 +106,20 @@ app.put("/admin/course/:courseId", authenticateUser, async (req, res) => {
   }
 });
 
+app.delete("/admin/course/:courseId", authenticateUser, async (req, res) => {
+  const course = await Course.findByIdAndDelete(req.params.courseId);
+  if (course) {
+    return res.status(200).json({ message: "Course deleted successfully" });
+  } else {
+    return res.status(404).json({ message: "Course not found" });
+  }
+});
+
+app.get("/admin/courses", authenticateUser, async (req, res) => {
+  const courses = await Course.find({});
+  return res.status(200).json({ courses: courses });
+});
+
 app.listen(PORT, () => {
   console.log("listening on port" + PORT);
 });
