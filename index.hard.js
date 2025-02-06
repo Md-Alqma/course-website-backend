@@ -37,20 +37,29 @@ const secret_key = "Sung_Jinwoo";
 
 const authenticateUser = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  if (authHeader) {
-    const token = authHeader.split(" ")[1];
-    jwt.verify(token, secret_key, (err, user) => {
-      if (err) {
-        return res.status(403).json({ message: "Authentication failed" });
-      } else {
-        req.user = user;
-        return next();
-      }
-    });
-  } else {
+  if (!authHeader) {
     return res.status(403).json({ message: "Authentication failed" });
   }
+
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, secret_key, (err, user) => {
+    if (err) {
+      return res.status(403).json({ message: "Authentication failed" });
+    }
+    req.user = user; // user object contains username and role
+    next();
+  });
 };
+
+const authenticateAdmin = (req, res, next) => {
+  authenticateUser(req, res, () => {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Access denied: Admins only" });
+    }
+    next();
+  });
+};
+
 app.get("/", (req, res) => {
   res.send("Welcome to course website");
 });
@@ -86,7 +95,7 @@ app.post("/admin/login", async (req, res) => {
   return res.status(403).json({ message: "Authentication failed" });
 });
 
-app.post("/admin/course", authenticateUser, async (req, res) => {
+app.post("/admin/course", authenticateAdmin, async (req, res) => {
   const course = new Course(req.body);
   await course.save();
   return res
@@ -94,7 +103,7 @@ app.post("/admin/course", authenticateUser, async (req, res) => {
     .json({ message: "Course created successfully", courseId: course.id });
 });
 
-app.put("/admin/course/:courseId", authenticateUser, async (req, res) => {
+app.put("/admin/course/:courseId", authenticateAdmin, async (req, res) => {
   const course = await Course.findByIdAndUpdate(req.params.courseId, req.body);
   if (course) {
     return res
@@ -105,7 +114,7 @@ app.put("/admin/course/:courseId", authenticateUser, async (req, res) => {
   }
 });
 
-app.delete("/admin/course/:courseId", authenticateUser, async (req, res) => {
+app.delete("/admin/course/:courseId", authenticateAdmin, async (req, res) => {
   const course = await Course.findByIdAndDelete(req.params.courseId);
   if (course) {
     return res.status(200).json({ message: "Course deleted successfully" });
@@ -114,7 +123,7 @@ app.delete("/admin/course/:courseId", authenticateUser, async (req, res) => {
   }
 });
 
-app.get("/admin/courses", authenticateUser, async (req, res) => {
+app.get("/admin/courses", authenticateAdmin, async (req, res) => {
   const courses = await Course.find({});
   return res.status(200).json({ courses: courses });
 });
