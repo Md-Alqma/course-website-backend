@@ -18,6 +18,7 @@ const courseSchema = new mongoose.Schema({
   price: Number,
   published: Boolean,
   imageURL: String,
+  instructor: String,
 });
 
 const userSchema = new mongoose.Schema({
@@ -92,6 +93,17 @@ app.post("/admin/course", authenticateUser, async (req, res) => {
   return res
     .status(200)
     .json({ message: "Course created successfully", courseId: course.id });
+});
+
+app.put("/admin/course/:courseId", authenticateUser, async (req, res) => {
+  const course = await Course.findByIdAndUpdate(req.params.courseId, req.body);
+  if (course) {
+    return res
+      .status(200)
+      .json({ message: "Course updated successfully", courseId: course.id });
+  } else {
+    return res.status(404).json({ message: "Course not found" });
+  }
 });
 
 app.listen(PORT, () => {
